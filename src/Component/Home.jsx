@@ -3,7 +3,7 @@ import './Home.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Link } from 'react-router-dom';
-
+import Cart from './Cart';
 import {
   FaHeart,
   FaSearch,
@@ -14,6 +14,8 @@ import {
   FaYoutube,
   FaLinkedin,
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 
 // Image imports
 import IMG1 from '../assets/IMG-20250802-WA0001.jpg';
@@ -43,6 +45,8 @@ const categories = [
   { name: 'Recliner', img: 'https://www.getmycouch.com/cdn/shop/products/liana-3-2-sofa-set-in-premium-blue-fabric-sofa-fn-gmc-005617-18936294015142_d2015288-7def-46e5-a621-9cc9f152b01c.jpg?v=1705569914' },
 ];
 
+
+
 const sofas = [
   { id: 1, name: 'Amber Three Seater Fabric Sofa', price: '₹48,999', oldPrice: '₹99,999', discount: 51, badge: 'New Arrival', img: IMG1, emi: '₹5801/Month' },
   { id: 2, name: 'Amber Two Seater Fabric Sofa', price: '₹40,000', oldPrice: '₹85,000', discount: 52, badge: 'New Arrival', img: IMG2, emi: '₹4736/Month' },
@@ -58,7 +62,10 @@ const sofas = [
   { id: 12, name: 'Recliner Sectional Sofa', price: '₹85,000', oldPrice: '₹1,50,000', discount: 43, badge: 'Top Rated', img: IMG12, emi: '₹9900/Month' },
 ];
 
+
 export default function Home() {
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
     const [showLogin, setShowLogin] = useState(false); 
@@ -72,51 +79,92 @@ export default function Home() {
     const matchesCategory = activeCategory === '' || sofa.name.toLowerCase().includes(activeCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
+const [user, setUser] = useState(null);
+
+useEffect(() => {
+  const savedUser = localStorage.getItem('loggedInUser');
+  if (savedUser) {
+    setUser(JSON.parse(savedUser));
+  }
+  AOS.init({ duration: 800 });
+}, []);
+const [cartItems, setCartItems] = useState([]);
+const [pendingSofa, setPendingSofa] = useState(null);
+const addToCart = (sofa) => {
+  const alreadyInCart = cartItems.find(item => item.id === sofa.id);
+  if (!alreadyInCart) {
+    setCartItems(prev => [...prev, sofa]);
+    navigate('/cart', { state: { cart: [...cartItems, sofa] } });
+  }
+};
+useEffect(() => {
+  if (user && pendingSofa) {
+    addToCart(pendingSofa);
+    setPendingSofa(null); // clear pending after adding
+  }
+}, [user, pendingSofa]);
+
 
   return (
     <>
+    
     {showLogin && <LoginRegister onBack={() => setShowLogin(false)} />}
+<nav className="bg-white shadow-sm py-3 fixed-top w-100" style={{ zIndex: 1030 }}>
+  <div className="container d-flex flex-wrap justify-content-between align-items-center">
+    {/* Logo */}
+    <div className="d-flex align-items-center mb-2 mb-md-0">
+      <img src={LOGO_IMAGE} alt="GOODWILL Logo" style={{ height: '60px', marginRight: '12px' }} />
+      <span className="fw-bold fs-4 text-dark">GOODWILL LINING</span>
+    </div>
 
- <nav className="bg-white shadow-sm py-3 fixed-top w-100" style={{ zIndex: 1030 }}>
-        <div className="container d-flex flex-wrap justify-content-between align-items-center">
-          {/* Logo */}
-          <div className="d-flex align-items-center mb-2 mb-md-0">
-            <img src={LOGO_IMAGE} alt="GOODWILL Logo" style={{ height: '60px', marginRight: '12px' }} />
-            <span className="fw-bold fs-4 text-dark">GOODWILL LINING</span>
-          </div>
+    {/* Search */}
+    <div className="d-flex align-items-center flex-grow-1 mx-4">
+      <input
+        type="text"
+        className="form-control me-2"
+        placeholder="Search sofas..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <button className="btn btn-dark">
+        <FaSearch />
+      </button>
+    </div>
 
-          {/* Search */}
-          <div className="d-flex align-items-center flex-grow-1 mx-4">
-            <input
-              type="text"
-              className="form-control me-2"
-              placeholder="Search sofas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="btn btn-dark">
-              <FaSearch />
-            </button>
-          </div>
+    {/* Icons */}
+    {user ? (
+      <div className="text-dark d-flex flex-column align-items-center gap-5">
+        <FaUser />
+        <div className="small">{user.name}</div>
+      </div>
+    ) : (
+      <div className="text-muted d-flex flex-column align-items-center"
+        style={{ cursor: 'pointer' }}
+        onClick={() => setShowLogin(true)}>
+        <FaUser />
+        <div className="small">Login</div>
+      </div>
+    )}
 
-          {/* Icons */}
-          <div className="d-flex gap-4 align-items-center fs-5">
-          
-            <div
-              className="text-muted text-decoration-none d-flex flex-column align-items-center"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setShowLogin(true)}
-            >
-              <FaUser />
-              <div className="small">Login</div>
-            </div>
-            <div className="text-muted d-flex flex-column align-items-center" style={{ cursor: 'pointer' }}>
-              <FaShoppingCart />
-              <div className="small">Cart</div>
-            </div>
-          </div>
-        </div>
-      </nav>
+  <div
+  className="text-muted d-flex flex-column align-items-center m-3"
+  style={{ cursor: 'pointer' }}
+  onClick={() => {
+    if (!user) {
+            navigate('/sofa/src/Component/Cart.jsx', { state: { cart: cartItems } }); 
+ // Not logged in: show login modal
+    } else {
+            setShowLogin(true);
+// Logged in: go to cart
+    }
+  }}
+>
+  <FaShoppingCart />
+  <div className="small">Cart</div>
+</div>
+
+  </div>
+</nav>  {/* ✅ ADD THIS if it's missing */}
 
       <main style={{ paddingTop: '100px' }} className="container-fluid p-0">
         <div className="bg-light py-5 px-5" style={{marginTop: '100px'}}>
@@ -188,7 +236,21 @@ export default function Home() {
                           </span>
                         </p>
                         <p className="mb-3 small text-muted">{sofa.emi} EMI available</p>
-                        <button className="btn btn-dark mt-auto">Add to Cart</button>
+<button
+  className="btn btn-dark mt-auto"
+  onClick={() => {
+    if (!user) {
+      setPendingSofa(sofa);    // 👈 save what they wanted to add
+      setShowLogin(true);      // 👈 show login modal
+    } else {
+      addToCart(sofa);         // 👈 already logged in → add directly
+    }
+  }}
+>
+  Add to Cart
+</button>
+
+
                       </div>
                     </div>
                   </div>

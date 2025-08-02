@@ -5,14 +5,35 @@ import BOTTOM_IMG from '../assets/LOGO.jpg';
 
 const LoginRegister = ({ onBack }) => {
   const [isRegister, setIsRegister] = useState(false);
+
   const toggleMode = () => setIsRegister(!isRegister);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const name = isRegister ? e.target.fullName.value : 'User';
+    const email = e.target.email.value;
+    const address = isRegister ? e.target.address.value : '';
+
+    const userData = {
+      name,
+      email,
+      address,
+    };
+
+    localStorage.setItem('loggedInUser', JSON.stringify(userData));
+    onBack(); // Close the login modal
+    window.location.reload(); // Reload to reflect login
+  };
 
   return (
     <div className="login-modal-backdrop">
       <div className="login-modal-container shadow-lg position-relative">
-
         <Link to="/">
-          <button className="btn btn-sm btn-light position-absolute top-0 start-0 m-2" onClick={onBack}>
+          <button
+            className="btn btn-sm btn-light position-absolute top-0 start-0 m-2"
+            onClick={onBack}
+          >
             ← Back
           </button>
         </Link>
@@ -33,33 +54,58 @@ const LoginRegister = ({ onBack }) => {
 
           {/* Right Form Section */}
           <div className="col-md-6 p-4">
-            <h4 className="mb-3">{isRegister ? 'Create an Account' : 'Login to Your Account'}</h4>
-            <form>
+            <h4 className="mb-3">
+              {isRegister ? 'Create an Account' : 'Login to Your Account'}
+            </h4>
+            <form onSubmit={handleSubmit}>
               {isRegister && (
                 <>
-                  <input type="text" placeholder="Full Name" className="form-control mb-3" required />
-                  <input type="tel" placeholder="Phone Number" className="form-control mb-3" required />
-                  <textarea placeholder="Address" className="form-control mb-3" rows={2} required />
+                  <input
+                    name="fullName"
+                    type="text"
+                    placeholder="Full Name"
+                    className="form-control mb-3"
+                    required
+                  />
+                  <textarea
+                    name="address"
+                    placeholder="Full Address"
+                    className="form-control mb-3"
+                    rows="3"
+                    required
+                  ></textarea>
                 </>
               )}
+              <input
+                name="email"
+                type="email"
+                placeholder="Email or Mobile"
+                className="form-control mb-3"
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="form-control mb-3"
+                required
+              />
 
-              <input type="email" placeholder="Email" className="form-control mb-3" required />
-              <input type="password" placeholder="Password" className="form-control mb-3" required />
-
-              <button className="btn btn-dark w-100 mb-2">
+              <button type="submit" className="btn btn-danger w-100 mb-2">
                 {isRegister ? 'Register' : 'Login'}
               </button>
 
-              <p className="text-center small">
-                {isRegister ? 'Already have an account?' : 'New to Goodwill Lining?'}
-                <span className="text-primary ms-1" style={{ cursor: 'pointer' }} onClick={toggleMode}>
-                  {isRegister ? 'Login' : 'Register'}
-                </span>
-              </p>
-
-              <p className="text-center small text-muted mt-3">
-                By continuing, you agree to our Terms & Conditions and Privacy Policy.
-              </p>
+              <div className="text-center mt-2">
+                <small>
+                  {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+                  <button
+                    type="button"
+                    className="btn btn-link p-0"
+                    onClick={toggleMode}
+                  >
+                    {isRegister ? 'Login' : 'Register'}
+                  </button>
+                </small>
+              </div>
             </form>
           </div>
         </div>
