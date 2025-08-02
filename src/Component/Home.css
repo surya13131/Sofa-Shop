@@ -1,0 +1,348 @@
+/* Home.css */
+*.home-wrapper {
+  width: 100vw; /* or 100% */
+  max-width: none; /* remove any default max */
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+
+/* Global */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f9f9f9;
+  color: #333;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 460%;
+}
+
+/* NAVBAR */
+nav {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+nav .container-fluid {
+  max-width: 100%; /* full width */
+  padding-left: 3rem;
+  padding-right: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+nav input.form-control {
+  border-radius: 20px 0 0 20px;
+  border-right: none;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.2rem;
+}
+
+nav button.btn {
+  border-radius: 0 20px 20px 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+/* CATEGORY SECTION */
+.categories-section {
+  background-color: #f4f4f4;
+  padding: 3rem 0; /* remove horizontal padding */
+  width: 100vw;
+  margin-left: calc(-1 * 3rem); /* counter navbar padding */
+  margin-right: calc(-1 * 3rem);
+}
+
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 1440px; /* optional max width for readability */
+  margin: 0 auto;
+  padding: 0 2rem; /* internal padding */
+  box-sizing: border-box;
+}
+
+.category-box {
+  transition: transform 0.3s ease-in-out;
+  cursor: pointer;
+  border-radius: 15px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background-color: white;
+  flex: 1 1 220px; /* flex grow, shrink and base width */
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.05);
+}
+
+.category-box img {
+  object-fit: cover;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  transition: transform 0.4s ease-in-out;
+}
+
+.category-box:hover {
+  transform: scale(1.07);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
+.category-box:hover img {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* SOFA COLLECTION */
+.sofa-collection {
+  width: 100vw;
+  margin-left: calc(-1 * 3rem);
+  margin-right: calc(-1 * 3rem);
+  padding: 3rem 0;
+  background-color: white;
+}
+
+.sofa-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+.sofa-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+  background-color: white;
+  flex: 1 1 280px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sofa-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+  height: 300px;
+  object-fit: cover;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.sofa-card .card-body {
+  min-height: 240px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-body .badge {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Button */
+.btn-gradient {
+  background: linear-gradient(45deg, #f15a24, #fbb03b);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 30px;
+  transition: background 0.3s ease, opacity 0.3s ease;
+  width: 100%;
+  font-size: 1.1rem;
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+}
+
+/* Footer */
+footer {
+  background-color: #222;
+  color: #fff;
+  padding: 3rem 2rem;
+}
+
+footer h6 {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+footer ul li {
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+footer ul li:hover {
+  color: #fbb03b;
+}
+
+footer ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+footer .fs-4 svg {
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  color: #fff;
+}
+
+footer .fs-4 svg:hover {
+  transform: scale(1.3);
+  color: #fbb03b;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1440px) {
+  .category-row,
+  .sofa-row {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  nav .container-fluid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .category-box img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-img-top {
+    height: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  nav .container-fluid {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  nav input.form-control {
+    border-radius: 1rem;
+    border-right: 1px solid #ccc;
+    width: 100%;
+  }
+
+  nav button.btn {
+    border-radius: 1rem;
+    width: 100%;
+  }
+
+  .categories-section,
+  .sofa-collection {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 2rem 1rem;
+    width: 100%;
+  }
+
+  .category-box img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .sofa-card {
+    margin-bottom: 2rem;
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .card-img-top {
+    height: 180px;
+  }
+}
+
+/* Additional fine tuning */
+.category-box {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.category-box:hover {
+  transform: scale(1.05);
+}
+
+.sofa-card img {
+  object-fit: cover;
+  height: 300px;
+  width: 100%;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.sofa-card .card-body {
+  min-height: 240px;
+  padding: 1.25rem 1.5rem;
+}
+
+input.form-control {
+  border-radius: 20px 0 0 20px;
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+}
+
+button.btn-outline-dark {
+  border-radius: 0 20px 20px 0;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.25rem;
+}
+/* Social icon styling */
+footer svg {
+  transition: transform 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1.2rem; /* adjust size as needed */
+  margin: 0 3px; /* spacing between icons */
+}
