@@ -1,9 +1,9 @@
 // src/components/OrderList.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-
-export default function OrderList({ orders, setOrders, customers, orderNameRef }) {
+export default function OrderList({ customers, orderNameRef }) {
+  const [orders, setOrders] = useState([]);
   const [filters, setFilters] = useState({ name: '', minPrice: '', location: '' });
 
   const [orderForm, setOrderForm] = useState({
@@ -15,6 +15,20 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
     date: '',
   });
   const [editingOrderId, setEditingOrderId] = useState(null);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch('http://localhost:8080/api/orders');
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error('Failed to fetch orders', err);
+    }
+  };
 
   const handleOrderInputChange = (field, value) => {
     setOrderForm((prev) => ({ ...prev, [field]: value }));
@@ -65,7 +79,7 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
     setEditingOrderId(null);
   };
 
-  const saveOrder = () => {
+  const saveOrder = async () => {
     if (
       !orderForm.user.name ||
       !orderForm.user.email ||
@@ -78,18 +92,27 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
     }
 
     const total = calculateTotal();
+    const orderData = { ...orderForm, total };
 
-    if (editingOrderId) {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === editingOrderId ? { ...orderForm, total, id: editingOrderId } : o
-        )
-      );
-    } else {
-      const newId = orders.length ? Math.max(...orders.map((o) => o.id)) + 1 : 1;
-      setOrders([...orders, { ...orderForm, total, id: newId }]);
+    try {
+      if (editingOrderId) {
+        await fetch(`http://localhost:8080/api/orders/${editingOrderId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+      } else {
+        await fetch('http://localhost:8080/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+      }
+      await fetchOrders();
+      resetOrderForm();
+    } catch (err) {
+      console.error('Failed to save order', err);
     }
-    resetOrderForm();
   };
 
   const editOrder = (order) => {
@@ -98,9 +121,15 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
     setTimeout(() => orderNameRef.current?.focus(), 0);
   };
 
-  const deleteOrder = (id) => {
-    if (window.confirm('Delete this order?')) {
-      setOrders((prev) => prev.filter((o) => o.id !== id));
+  const deleteOrder = async (id) => {
+    if (!window.confirm('Delete this order?')) return;
+    try {
+      await fetch(`http://localhost:8080/api/orders/${id}`, {
+        method: 'DELETE',
+      });
+      await fetchOrders();
+    } catch (err) {
+      console.error('Failed to delete order', err);
     }
   };
 
@@ -243,12 +272,13 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
         </div>
       </div>
 
-      {/* Table */}
+       {/* Table with Phone */}
       <div className="table-responsive">
         <table className="table table-bordered table-hover align-middle">
           <thead className="table-dark">
             <tr>
               <th>Customer</th>
+              <th>Phone</th>
               <th>Items</th>
               <th>Total (₹)</th>
               <th>Location</th>
@@ -258,11 +288,12 @@ export default function OrderList({ orders, setOrders, customers, orderNameRef }
           </thead>
           <tbody>
             {filteredOrders.length === 0 ? (
-              <tr><td colSpan="6" className="text-center text-muted">No matching orders</td></tr>
+              <tr><td colSpan="7" className="text-center text-muted">No matching orders</td></tr>
             ) : (
               filteredOrders.map((order) => (
                 <tr key={order.id}>
                   <td>{order.user.name}</td>
+                  <td>{order.user.phone}</td>
                   <td>
                     <ul className="mb-0 ps-3">
                       {order.items.map((item, i) => (

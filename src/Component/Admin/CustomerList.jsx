@@ -1,10 +1,25 @@
 // src/components/CustomerList.jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import React, { useState } from 'react';
-
-export default function CustomerList({ customers, setCustomers, orders, setOrders, customerNameRef }) {
+export default function CustomerList({ customers = [], setCustomers, orders = [], setOrders, customerNameRef }) {
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', address: '' });
   const [editingEmail, setEditingEmail] = useState(null);
+
+  useEffect(() => {
+    fetchAllCustomers();
+  }, []);
+
+  const fetchAllCustomers = async () => {
+    try {
+      const res = await axios.get('http://localhost:8080/api/customers');
+      const data = Array.isArray(res.data) ? res.data : [];
+      setCustomers(data);
+    } catch (err) {
+      console.error('Failed to fetch customers:', err);
+      setCustomers([]);
+    }
+  };
 
   const handleCustomerChange = (field, value) => {
     setCustomerForm((prev) => ({ ...prev, [field]: value }));
@@ -15,26 +30,25 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
     setEditingEmail(null);
   };
 
-  const saveCustomer = () => {
+  const saveCustomer = async () => {
     if (!customerForm.name || !customerForm.email) {
       alert('Name and Email are required.');
       return;
     }
 
-    if (editingEmail) {
-      const updated = customers.map((cust) =>
-        cust.email === editingEmail ? customerForm : cust
-      );
-      setCustomers(updated);
-    } else {
-      if (customers.some((cust) => cust.email === customerForm.email)) {
-        alert('Customer with this email already exists.');
-        return;
+    try {
+      if (editingEmail) {
+        await axios.put(`http://localhost:8080/api/customers/${encodeURIComponent(editingEmail)}`, customerForm);
+      } else {
+        await axios.post('http://localhost:8080/api/customers', customerForm);
       }
-      setCustomers([...customers, customerForm]);
-    }
 
-    resetCustomerForm();
+      fetchAllCustomers();
+      resetCustomerForm();
+    } catch (error) {
+      console.error('Failed to save customer:', error.response?.data || error.message);
+      alert('Failed to save customer. Please check console for details.');
+    }
   };
 
   const editCustomer = (cust) => {
@@ -43,19 +57,33 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
     setTimeout(() => customerNameRef?.current?.focus(), 0);
   };
 
-  const deleteCustomer = (email) => {
-    if (orders.some((order) => order.user.email === email)) {
+  const deleteCustomer = async (email) => {
+    if (orders.some((order) => order.user?.email === email)) {
       alert('Cannot delete customer with existing orders.');
       return;
     }
 
     if (window.confirm('Are you sure you want to delete this customer?')) {
-      setCustomers(customers.filter((c) => c.email !== email));
+      try {
+        const encodedEmail = encodeURIComponent(email);
+        await axios.delete(`http://localhost:8080/api/customers/${encodedEmail}`);
+
+        // Update state directly without fetching again
+        setCustomers((prev) => prev.filter((c) => c.email !== email));
+
+        // If deleting the one being edited, clear the form
+        if (editingEmail === email) {
+          resetCustomerForm();
+        }
+      } catch (error) {
+        console.error('Failed to delete customer:', error.response?.data || error.message);
+        alert('Failed to delete customer. Please check console for details.');
+      }
     }
   };
 
   const exportToCSV = () => {
-    if (!customers.length) return;
+    if (!Array.isArray(customers) || customers.length === 0) return;
 
     const headers = Object.keys(customers[0]);
     const csv = [
@@ -76,7 +104,7 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
     <div>
       <h3 className="mb-4">Customer Management</h3>
 
-      {/* Customer Form */}
+      {/* Form */}
       <form onSubmit={(e) => { e.preventDefault(); saveCustomer(); }}>
         <div className="row">
           <div className="col-md-6 mb-3">
@@ -97,6 +125,7 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
               value={customerForm.email}
               onChange={(e) => handleCustomerChange('email', e.target.value)}
               required
+              disabled={editingEmail !== null}
             />
           </div>
           <div className="col-md-6 mb-3">
@@ -117,9 +146,7 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary">
-          {editingEmail ? 'Update Customer' : 'Add Customer'}
-        </button>
+        
         {editingEmail && (
           <button type="button" className="btn btn-secondary ms-2" onClick={resetCustomerForm}>
             Cancel
@@ -127,7 +154,7 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
         )}
       </form>
 
-      {/* Customer Table */}
+      {/* Table */}
       <div className="table-responsive mt-4">
         <table className="table table-bordered table-hover align-middle">
           <thead className="table-dark">
@@ -140,9 +167,7 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
             </tr>
           </thead>
           <tbody>
-            {customers.length === 0 ? (
-              <tr><td colSpan="5" className="text-center text-muted">No customers found</td></tr>
-            ) : (
+            {Array.isArray(customers) && customers.length > 0 ? (
               customers.map((cust, idx) => (
                 <tr key={cust.email + idx}>
                   <td>{cust.name}</td>
@@ -159,6 +184,12 @@ export default function CustomerList({ customers, setCustomers, orders, setOrder
                   </td>
                 </tr>
               ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center text-muted">
+                  No customers found
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

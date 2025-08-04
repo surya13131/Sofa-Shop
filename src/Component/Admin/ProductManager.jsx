@@ -1,16 +1,23 @@
-// src/components/ProductManager.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function ProductManager({ products, setProducts }) {
+export default function ProductManager() {
+  const [products, setProducts] = useState([]);
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
     emi: '',
     discount: '',
     description: '',
-    image: null,
+    image: '',
   });
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/sofas')
+      .then(res => res.json())
+      .then(setProducts)
+      .catch(console.error);
+  }, []);
 
   const handleProductChange = (field, value) => {
     setProductForm((prev) => ({ ...prev, [field]: value }));
@@ -18,13 +25,13 @@ export default function ProductManager({ products, setProducts }) {
 
   const handleProductImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProductForm((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProductForm((prev) => ({ ...prev, image: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const resetForm = () => {
@@ -34,43 +41,58 @@ export default function ProductManager({ products, setProducts }) {
       emi: '',
       discount: '',
       description: '',
-      image: null,
+      image: '',
     });
-    setEditingIndex(null);
+    setEditingId(null);
   };
 
-  const saveProduct = () => {
+  const saveProduct = async () => {
     if (!productForm.name || !productForm.price) {
-      alert('Please provide name and price.');
+      alert('Please enter both name and price');
       return;
     }
 
-    if (editingIndex !== null) {
-      const updated = [...products];
-      updated[editingIndex] = productForm;
-      setProducts(updated);
-    } else {
-      setProducts([...products, productForm]);
-    }
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId
+      ? `http://localhost:8080/api/sofas/${editingId}`
+      : 'http://localhost:8080/api/sofas';
 
-    resetForm();
-  };
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productForm),
+      });
 
-  const editProduct = (index) => {
-    setProductForm(products[index]);
-    setEditingIndex(index);
-  };
+      if (!res.ok) throw new Error('Failed to save product');
 
-  const deleteProduct = (index) => {
-    if (window.confirm('Delete this product?')) {
-      const updated = products.filter((_, i) => i !== index);
+      const updated = await fetch('http://localhost:8080/api/sofas').then((r) => r.json());
       setProducts(updated);
       resetForm();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const editProduct = (product) => {
+    setProductForm(product);
+    setEditingId(product._id);
+  };
+
+  const deleteProduct = async (id) => {
+    if (!window.confirm('Delete this product?')) return;
+    try {
+      await fetch(`http://localhost:8080/api/sofas/${id}`, { method: 'DELETE' });
+      const updated = await fetch('http://localhost:8080/api/sofas').then((r) => r.json());
+      setProducts(updated);
+    } catch (err) {
+      alert('Failed to delete product');
     }
   };
 
   const exportToCSV = () => {
     if (!products.length) return;
+
     const headers = Object.keys(products[0]);
     const csv = [
       headers.join(','),
@@ -87,8 +109,8 @@ export default function ProductManager({ products, setProducts }) {
   };
 
   return (
-    <div>
-      <h3 className="mb-4">Product Manager</h3>
+    <div className="container mt-5">
+      <h3>Product Manager</h3>
       <form onSubmit={(e) => { e.preventDefault(); saveProduct(); }} className="mb-4">
         <div className="row">
           <div className="col-md-6 mb-3">
@@ -119,18 +141,17 @@ export default function ProductManager({ products, setProducts }) {
         </div>
 
         <button type="submit" className="btn btn-primary">
-          {editingIndex !== null ? 'Update' : 'Add'} Product
+          {editingId ? 'Update' : 'Add'} Product
         </button>
-        {editingIndex !== null && (
+        {editingId && (
           <button type="button" className="btn btn-secondary ms-2" onClick={resetForm}>
             Cancel
           </button>
         )}
       </form>
 
-      {/* Product Table */}
       <div className="table-responsive">
-        <table className="table table-bordered align-middle product-table">
+        <table className="table table-bordered">
           <thead className="table-dark">
             <tr>
               <th>Image</th>
@@ -139,34 +160,24 @@ export default function ProductManager({ products, setProducts }) {
               <th>EMI</th>
               <th>Discount</th>
               <th>Description</th>
-              <th style={{ minWidth: '140px' }}>Actions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan="7" className="text-center text-muted">No products added</td></tr>
+              <tr><td colSpan="7" className="text-center text-muted">No products</td></tr>
             ) : (
-              products.map((p, i) => (
-                <tr key={i} className="product-row">
-                  <td>
-                    {p.image ? (
-                      <img
-                        src={p.image}
-                        alt="product"
-                        width="70"
-                        height="50"
-                        style={{ objectFit: 'cover', borderRadius: '6px' }}
-                      />
-                    ) : 'No Image'}
-                  </td>
+              products.map((p) => (
+                <tr key={p._id}>
+                  <td>{p.image ? <img src={p.image} alt="" width="70" height="50" /> : 'No image'}</td>
                   <td>{p.name}</td>
                   <td>₹{p.price}</td>
                   <td>{p.emi}</td>
                   <td>{p.discount}%</td>
                   <td>{p.description}</td>
                   <td>
-                    <button className="btn btn-sm btn-outline-primary me-2" onClick={() => editProduct(i)}>Edit</button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => deleteProduct(i)}>Delete</button>
+                    <button className="btn btn-sm btn-outline-primary me-2" onClick={() => editProduct(p)}>Edit</button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => deleteProduct(p._id)}>Delete</button>
                   </td>
                 </tr>
               ))
@@ -175,25 +186,7 @@ export default function ProductManager({ products, setProducts }) {
         </table>
       </div>
 
-      <button className="btn btn-success mt-3" onClick={exportToCSV}>
-        Export to CSV
-      </button>
-
-      {/* Internal CSS */}
-      <style jsx>{`
-        .product-table {
-          min-width: 900px;
-        }
-
-        .product-row:hover {
-          background-color: #f5f9ff;
-          transition: background-color 0.2s ease-in-out;
-        }
-
-        .btn-sm {
-          font-size: 0.75rem;
-        }
-      `}</style>
+      <button className="btn btn-success mt-3" onClick={exportToCSV}>Export to CSV</button>
     </div>
   );
 }
