@@ -119,7 +119,8 @@ const Cart = ({ onClose }) => {
             </div>
 
             <div style={styles.buttonRow}>
-              <button style={styles.secondaryButton} onClick={onClose}>← Back</button>
+<button style={styles.secondaryButton} onClick={() => navigate('/')}>← Back</button>
+
               <button style={styles.primaryButton} onClick={handleBuyNow}>💳 Buy Now</button>
             </div>
           </>
