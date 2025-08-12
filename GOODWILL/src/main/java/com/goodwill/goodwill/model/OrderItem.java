@@ -10,7 +10,10 @@ public class OrderItem {
     private Long id;
 
     private String name;
-    private int price;
+
+    // Use Integer instead of int to allow null values if needed
+    private Integer price;
+    private Integer quantity;
 
     // Getters and Setters
     public Long getId() {
@@ -21,8 +24,12 @@ public class OrderItem {
         return name;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
     }
 
     public void setId(Long id) {
@@ -33,7 +40,11 @@ public class OrderItem {
         this.name = name;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

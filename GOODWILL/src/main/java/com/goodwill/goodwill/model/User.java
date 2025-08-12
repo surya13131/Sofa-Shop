@@ -11,28 +11,25 @@ public class User {
     @Id
     private String email; // primary key
 
-
-
     private String phone;
     private String name;
     private String password;
     private String address;
 
-    // Getters and Setters
-    public String getEmail() {
-        return email;
+    public String getRole() {
+        return role;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setRole(String role) {
+        this.role = role;
     }
 
-    public String getName() {
-        return name;
+    public String getAddress() {
+        return address;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getPassword() {
@@ -43,13 +40,14 @@ public class User {
         this.password = password;
     }
 
-    public String getAddress() {
-        return address;
+    public String getName() {
+        return name;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setName(String name) {
+        this.name = name;
     }
+
     public String getPhone() {
         return phone;
     }
@@ -57,4 +55,17 @@ public class User {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    // Add the role field for user/admin roles
+    private String role = "USER"; // default role is USER
+
+    // You can remove explicit getters/setters because Lombok's @Data generates them
 }
