@@ -9,6 +9,7 @@ import AdminPage from './Component/Admin/AdminPage'; // keep as AdminPage
 import ProductManager from './Component/Admin/ProductManager';
 import OrderList from './Component/Admin/OrderList';
 import CustomerList from './Component/Admin/CustomerList';
+import AdminLogin from './Component/AdminLogin';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/login" element={<LoginRegister />} />
         <Route path="/cart" element={<Cart />} />
 

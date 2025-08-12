@@ -165,9 +165,9 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="p-5 ms-lg-5 ">
+      <main className="p-5 ms-lg-5 mt-3">
         <section className="container text-center pt-5 mt-5 ms-lg-5">
-          <h2 className="mb-5 fw-bold text-uppercase  ms-lg-5" >Sofa Categories</h2>
+          <h2 className="mb-5 fw-bold text-uppercase  ms-lg-5 my-5" >Sofa Categories</h2>
           <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4 justify-content-center  ms-lg-5">
             {categories.map((cat, i) => (
               <div key={i} className="col d-flex justify-content-center">

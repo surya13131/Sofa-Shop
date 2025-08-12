@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import ProductManager from './ProductManager';
 import OrderList from './OrderList';
@@ -22,23 +22,26 @@ export default function AdminPage() {
   }, []);
 
   const fetchAllData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const [prodRes, orderRes, userRes] = await Promise.all([
+        fetch('http://localhost:8080/api/sofas'),
+        fetch('http://localhost:8080/api/orders'),
+        fetch('http://localhost:8080/api/users'),
+      ]);
 
-      const prodRes = await fetch('http://localhost:8080/api/sofas');
-      const prodData = await prodRes.json();
+      const [prodData, orderData, userData] = await Promise.all([
+        prodRes.json(),
+        orderRes.json(),
+        userRes.json(),
+      ]);
+
       setProducts(prodData);
-
-      const orderRes = await fetch('http://localhost:8080/api/orders');
-      const orderData = await orderRes.json();
       setOrders(orderData);
-
-      const userRes = await fetch('http://localhost:8080/api/users');
-      const userData = await userRes.json();
       setCustomers(userData);
     } catch (err) {
-      console.error('Error fetching admin data:', err);
-      alert('Failed to fetch admin data. Please check your backend server.');
+      console.error('Admin Data Fetch Error:', err);
+     
     } finally {
       setLoading(false);
     }
@@ -48,92 +51,149 @@ export default function AdminPage() {
     navigate('/');
   };
 
-  if (loading) {
-    return <div className="p-4">Loading admin data...</div>;
-  }
-
   return (
-    <Container fluid className="admin-container">
+    <Container fluid className="admin-page">
       <Row className="g-0">
-        <Col md={3} lg={2} className="sidebar shadow-sm">
-          <div className="sidebar-header">
-            <h4 className="text-dark" style={{ fontFamily: 'initial', fontWeight: 'bolder' }}>
-              Admin Panel
+        {/* Sidebar */}
+        <Col md={3} lg={2} className="sidebar d-flex flex-column align-items-start p-4 shadow-sm">
+          <div className="mb-4 w-100 text-center">
+            <h4 className="fw-bold" style={{ fontFamily: 'cursive', color: '#0a3d62' }}>
+              🛠️ Admin Panel
             </h4>
           </div>
-          <Nav className="flex-column nav-links">
-            <Nav.Link onClick={() => setActiveSection('products')} className={activeSection === 'products' ? 'active' : ''}>
-              🛠️ Product Manager
+          <Nav className="flex-column w-100">
+            <Nav.Link
+              className={`nav-item ${activeSection === 'products' ? 'active' : ''}`}
+              onClick={() => setActiveSection('products')}
+            >
+              🪑 Product Manager
             </Nav.Link>
-            <Nav.Link onClick={() => setActiveSection('orders')} className={activeSection === 'orders' ? 'active' : ''}>
+            <Nav.Link
+              className={`nav-item ${activeSection === 'orders' ? 'active' : ''}`}
+              onClick={() => setActiveSection('orders')}
+            >
               📦 Order List
             </Nav.Link>
-            <Nav.Link onClick={() => setActiveSection('customers')} className={activeSection === 'customers' ? 'active' : ''}>
+            <Nav.Link
+              className={`nav-item ${activeSection === 'customers' ? 'active' : ''}`}
+              onClick={() => setActiveSection('customers')}
+            >
               👥 Customer List
             </Nav.Link>
           </Nav>
         </Col>
 
-        <Col md={9} lg={10} className="main-content px-4 py-3">
+        {/* Main Content */}
+        <Col md={9} lg={10} className="main-content p-4">
           <div className="d-flex justify-content-end mb-3">
-            <Button variant="outline-danger" onClick={handleLogout}>🔙 Logout</Button>
+            <Button variant="outline-danger" onClick={handleLogout} className="rounded-3">
+              🔙 Logout
+            </Button>
           </div>
 
-          {activeSection === 'products' && (
-            <ProductManager products={products} setProducts={setProducts} />
-          )}
-          {activeSection === 'orders' && (
-            <OrderList orders={orders} setOrders={setOrders} customers={customers} orderNameRef={orderNameRef} />
-          )}
-          {activeSection === 'customers' && (
-            <CustomerList customers={customers} setCustomers={setCustomers} orders={orders} setOrders={setOrders} customerNameRef={customerNameRef} />
+          {/* Loading State */}
+          {loading ? (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '70vh' }}>
+              <Spinner animation="border" variant="primary" />
+              <span className="ms-3 fs-5">Loading admin data...</span>
+            </div>
+          ) : (
+            <div className="fade-in">
+              {activeSection === 'products' && (
+                <ProductManager products={products} setProducts={setProducts} />
+              )}
+              {activeSection === 'orders' && (
+                <OrderList
+                  orders={orders}
+                  setOrders={setOrders}
+                  customers={customers}
+                  orderNameRef={orderNameRef}
+                />
+              )}
+              {activeSection === 'customers' && (
+                <CustomerList
+                  customers={customers}
+                  setCustomers={setCustomers}
+                  orders={orders}
+                  setOrders={setOrders}
+                  customerNameRef={customerNameRef}
+                />
+              )}
+            </div>
           )}
         </Col>
       </Row>
 
+
       <style>{`
-        .admin-container {
+        .admin-page {
           width: 100vw;
           height: 100vh;
-          padding: 0;
-          margin: 0;
-          background-color: #f8f9fa;
-          overflow-x: hidden;
+          background-color: #f5f7fa;
+          overflow: hidden;
         }
+
         .sidebar {
+          background: linear-gradient(to bottom right, #dff9fb, #c7ecee);
           height: 100vh;
-          padding: 20px;
-          background: linear-gradient(135deg, #b3e5fc, #e1f5fe);
-          border-top-right-radius: 20px;
-          border-bottom-right-radius: 20px;
+          border-top-right-radius: 5px;
+          border-bottom-right-radius: 5px;
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+          padding: 12px 20px;
+          font-size: 16px;
+          font-weight: 500;
+          color: #34495e;
+          margin-bottom: 10px;
+          border-radius: px;
           transition: all 0.3s ease;
         }
-        .sidebar-header {
-          margin-bottom: 30px;
+
+        .nav-item:hover {
+          background-color: rgba(33, 150, 243, 0.1);
+          color: #218cfa;
         }
-        .nav-link {
-          color: #0a355f;
-          padding: 12px 16px;
-          border-radius: 12px;
-          font-weight: 500;
-          margin-bottom: 10px;
-          transition: background 0.3s, color 0.3s;
+
+        .nav-item.active {
+          background-color: #218cfa;
+          color: white;
         }
-        .nav-link:hover {
-          background-color: rgba(13, 110, 253, 0.1);
-          color: #0d6efd;
-        }
-        .nav-link.active {
-          background-color: #0d6efd;
-          color: white !important;
-        }
+
         .main-content {
           height: 100vh;
           background-color: #ffffff;
           overflow-y: auto;
+          border-top-left-radius: 25px;
+          border-bottom-left-radius: 25px;
+          box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
         }
-        button.btn-outline-danger {
-          border-radius: 10px;
+
+        .fade-in {
+          animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .sidebar {
+            border-radius: 0;
+            height: auto;
+            padding: 1rem;
+          }
+          .main-content {
+            border-radius: 0;
+          }
         }
       `}</style>
     </Container>

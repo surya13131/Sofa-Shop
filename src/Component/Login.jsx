@@ -167,6 +167,15 @@ const LoginRegister = ({ onBack, onLoginSuccess }) => {
                   </button>
                 </small>
               </div>
+
+              {/* Admin link */}
+              <div className="text-center mt-3">
+                <small>
+                  <Link to="/admin/login" className="text-decoration-none">
+                    I am an admin
+                  </Link>
+                </small>
+              </div>
             </form>
           </div>
         </div>
