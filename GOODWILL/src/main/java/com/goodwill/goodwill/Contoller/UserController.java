@@ -32,7 +32,7 @@ public class UserController {
         }
     }
 
-    // Admin login
+
     @PostMapping("/admin/login")
     public ResponseEntity<?> loginAdmin(@RequestBody LoginRequestDto request) {
         try {
@@ -58,7 +58,7 @@ public class UserController {
         }
     }
 
-    // Change password
+
     @PostMapping("/admin/change-password")
     public ResponseEntity<?> changePassword (@RequestBody ChangePasswordDto dto) {
         try {
