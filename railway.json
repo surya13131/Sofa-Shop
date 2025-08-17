@@ -1,9 +1,0 @@
-{
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "cd GOODWILL && ./mvnw package"
-  },
-  "deploy": {
-    "startCommand": "java -Dserver.port=$PORT -jar GOODWILL/target/your-app.jar"
-  }
-}
