@@ -4,6 +4,6 @@
     "buildCommand": "cd GOODWILL && ./mvnw package"
   },
   "deploy": {
-    "startCommand": "java -Dserver.port=$PORT -jar GOODWILL/target/your-app.jar"
+    "startCommand": "java -Dserver.port=$PORT -jar GOODWILL/target/GOODWILL-0.0.1-SNAPSHOT.jar"
   }
 }
