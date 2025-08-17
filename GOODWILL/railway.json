@@ -1,0 +1,7 @@
+{
+  "build": {
+    "dir": "GOODWILL",
+    "install": "./mvnw package",
+    "start": "java -jar target/goodwill-0.0.1-SNAPSHOT.jar"
+  }
+}
